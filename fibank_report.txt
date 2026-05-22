@@ -1,0 +1,218 @@
+
+════════════════════════════════════════════════════════════════════════
+  fibank.al BRAND PROTECTION REPORT  —  2026-05-22 21:10:54
+════════════════════════════════════════════════════════════════════════
+  Target: fibank.al  |  Domains analysed: 62
+════════════════════════════════════════════════════════════════════════
+
+  ⚠️   21 suspicious domain(s) detected:
+
+  🔴 HIGH  [ 78/100]  myfibank.com
+    Title      : MyfiBank.com is for sale | HugeDomains
+    Redirects  → https://www.hugedomains.com/domain_profile.cfm?d=myfibank.com
+    HTTP status: 200
+    Brand hits : fibank, username, password, account, transfer
+    Phishing   : click here
+
+  🟠 MEDIUM  [ 63/100]  fibank.com
+    Title      : Home - Fintech Bank Ltd
+    Redirects  → https://fibank.com/
+    HTTP status: 200
+    Brand hits : banking, login, account, balance
+
+  🟠 MEDIUM  [ 63/100]  fibank.io
+    Title      : fibank – Conta digital que não abandona o empresário
+    Redirects  → https://fibank.io/
+    HTTP status: 200
+    Brand hits : fibank, banking, transfer, internet banking
+
+  🟠 MEDIUM  [ 51/100]  ffibank.com
+    Title      : Personal & Commercial Banking | First Foundation Bank
+    Redirects  → https://www.firstfoundationinc.com/
+    HTTP status: 200
+    Brand hits : banking, sign in, account
+
+  🟠 MEDIUM  [ 51/100]  ffibank.net
+    Title      : Personal & Commercial Banking | First Foundation Bank
+    Redirects  → https://www.firstfoundationinc.com/
+    HTTP status: 200
+    Brand hits : banking, sign in, account
+
+  🟠 MEDIUM  [ 51/100]  ffibank.org
+    Title      : Personal & Commercial Banking | First Foundation Bank
+    Redirects  → https://www.firstfoundationinc.com/
+    HTTP status: 200
+    Brand hits : banking, sign in, account
+
+  🟡 LOW  [ 37/100]  ibank.com
+    Title      : iBank - Be Friends with Your Money and Live Your Best Life
+    Redirects  → https://www.ibank.com/
+    HTTP status: 200
+    Brand hits : account, balance
+    Phishing   : submit
+
+  🟡 LOW  [ 34/100]  efibank.com
+    Title      : efibank.com | Registered at
+    Redirects  → http://www.efibank.com/
+    HTTP status: 200
+    Brand hits : fibank, account
+
+  🟡 LOW  [ 34/100]  efibank.eu
+    Title      : efibank.eu | Registered at
+    Redirects  → http://www.efibank.eu/
+    HTTP status: 200
+    Brand hits : fibank, account
+
+  🟡 LOW  [ 34/100]  efibank.net
+    Title      : efibank.net | Registered at
+    Redirects  → http://www.efibank.net/
+    HTTP status: 200
+    Brand hits : fibank, account
+
+  🟡 LOW  [ 29/100]  fiibank.com
+    Title      : Welcome to Fii Bank | We are a private bank
+    Redirects  → https://fiibank.com/
+    HTTP status: 200
+    Brand hits : banking, account
+
+  🟡 LOW  [ 27/100]  efibank.app
+    Title      : efibank.app - efibank Resources and Information.
+    Redirects  → https://efibank.app/
+    HTTP status: 200
+    Brand hits : fibank
+
+  🟡 LOW  [ 27/100]  webfibank.com
+    Title      : webfibank.com
+    Redirects  → https://www.afternic.com/forsale/webfibank.com?traffic_id=GoDaddy_DLS&traffic_ty
+    HTTP status: 200
+    Brand hits : fibank
+
+  🟡 LOW  [ 25/100]  fiban.org
+    Title      : Home | FiBAN
+    Redirects  → https://fiban.org/
+    HTTP status: 200
+    Brand hits : login
+    Phishing   : submit
+
+  🟡 LOW  [ 24/100]  ibank.eu
+    Title      : ibank.eu is for sale!
+    Redirects  → https://trusted.domainseller.site/ibank.eu
+    HTTP status: 200
+    Brand hits : account, transfer
+
+  🟡 LOW  [ 22/100]  fibank.eu
+    Title      : FIBank.EU
+    Redirects  → http://fibank.eu/
+    HTTP status: 200
+    Brand hits : fibank
+
+  🟡 LOW  [ 22/100]  newfibank.com
+    Redirects  → http://newfibank.com/
+    HTTP status: 200
+    Brand hits : fibank
+
+  🟡 LOW  [ 21/100]  fiibank.net
+    Title      : HOME | deactivate-domain
+    Redirects  → https://www.wix.com/domain/deactivate-domain
+    HTTP status: 200
+    Phishing   : confirm your, click here
+
+  🟡 LOW  [ 17/100]  fibak.org
+    Title      : Fibak - Startseite
+    Redirects  → https://www.fibak.org
+    HTTP status: 200
+    Brand hits : login
+
+  🟡 LOW  [ 17/100]  fibbank.net
+    Title      : FERMION CAPITAL SARL — Luxembourg Digital Banking Platform
+    Redirects  → https://www.fermionemp.com/
+    HTTP status: 200
+    Brand hits : banking
+
+  🟡 LOW  [ 16/100]  fiank.com
+    Title      : Attention Required! | Cloudflare
+    Redirects  → https://fiank.com/
+    HTTP status: 403
+    Phishing   : locked, submit
+
+  🟢 NONE  [ 12/100]  fbank.xyz
+    Redirects  → https://fbank.xyz/
+    HTTP status: 200
+    Brand hits : transfer
+
+  🟢 NONE  [ 12/100]  ibank.app
+    Redirects  → http://ibank.app/
+    HTTP status: 200
+    Brand hits : login
+
+  🟢 NONE  [ 10/100]  efibank.xyz
+
+  🟢 NONE  [ 10/100]  fibank.net
+
+  🟢 NONE  [ 10/100]  fibank.org
+
+  🟢 NONE  [ 10/100]  fibank.xyz
+    Title      : Redirecting...
+    Redirects  → https://fibank.xyz/
+    HTTP status: 200
+
+  🟢 NONE  [ 10/100]  fibanks.xyz
+
+  🟢 NONE  [ 10/100]  myfibank.eu
+
+  🟢 NONE  [ 10/100]  netfibank.com
+
+  🟢 NONE  [  5/100]  fbank.com
+    Title      : 重庆富民银行门户网站
+    Redirects  → https://www.fbank.com/
+    HTTP status: 200
+
+  🟢 NONE  [  5/100]  fi-bank.com
+    Title      : fi-bank.com
+    Redirects  → https://fi-bank.com/
+    HTTP status: 200
+
+  🟢 NONE  [  5/100]  ifbank.app
+    Title      : ifbank.app
+    Redirects  → https://ifbank.app/
+    HTTP status: 200
+
+  🟢 NONE  [  5/100]  ifbank.net
+    Title      : (주)이프뱅크코리아
+    Redirects  → http://girocms.com/
+    HTTP status: 200
+
+  🟢 NONE  [  0/100]  fbank.org
+    Title      : fbank.org
+    Redirects  → https://fbank.org/
+    HTTP status: 200
+
+  🟢 NONE  [  0/100]  fibak.net
+    Title      : WELCOME TO FIBAK - FIBAK
+    Redirects  → https://www.fibak.net/
+    HTTP status: 200
+
+  🟢 NONE  [  0/100]  fiban.co
+    Title      : fiban.co | 521: Web server is down
+    Redirects  → https://fiban.co/
+    HTTP status: 521
+
+  🟢 NONE  [  0/100]  firstinvestmentbank.app
+    Title      : Домен не прилинкован ни к одной из директорий на сервере!
+    Redirects  → http://firstinvestmentbank.app/
+    HTTP status: 200
+
+  🟢 NONE  [  0/100]  ibank.biz
+    Title      : Just a moment...
+    Redirects  → https://sedo.com/search/details/?domain=ibank.biz&campaignId=329145&origin=sales
+    HTTP status: 403
+
+  🟢 NONE  [  0/100]  ibank.net
+    Title      : Not Found
+    Redirects  → http://ibank.net/
+    HTTP status: 404
+
+════════════════════════════════════════════════════════════════════════
+  Summary: 🔴 HIGH=1  🟠 MEDIUM=5  🟡 LOW=15
+════════════════════════════════════════════════════════════════════════
+
