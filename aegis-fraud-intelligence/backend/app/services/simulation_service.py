@@ -6,6 +6,7 @@ from app.models import Device, FraudAlert, LoginEvent, Transaction, User
 from app.services.explanation_engine import generate_explanation
 from app.services.friction_engine import determine_friction_action
 from app.services.log_engine import create_security_log
+from app.services.message_service import create_bank_message
 from app.services.mule_engine import create_mule_ring
 from app.services.risk_engine import calculate_login_risk, calculate_transaction_risk
 from app.services.token_engine import detect_token_theft
@@ -153,6 +154,20 @@ def simulate_transaction(db: Session, input_data, fallback_user: User | None = N
     )
     db.add(transaction)
 
+    if transaction_status in {"REQUIRE_2FA", "HELD", "BLOCKED"}:
+        create_bank_message(
+            db,
+            user_id=user.id,
+            channel="IN_APP",
+            title="Transaction security review",
+            body=(
+                "Your transfer was held or blocked for security review. "
+                "Please open the banking app to review the status."
+            ),
+            message_type="TRANSACTION_ALERT",
+            risk_level="CRITICAL" if transaction_status == "BLOCKED" else "HIGH",
+        )
+
     alert = None
     if risk["risk_score"] >= 61:
         explanation = generate_explanation(
@@ -172,6 +187,20 @@ def simulate_transaction(db: Session, input_data, fallback_user: User | None = N
             status="OPEN",
         )
         db.add(alert)
+        db.flush()
+        create_bank_message(
+            db,
+            user_id=user.id,
+            channel="IN_APP",
+            title="Security alert on your account",
+            body=(
+                "AEGIS detected unusual activity on your account. "
+                "Please review your account from inside the banking app."
+            ),
+            message_type="FRAUD_ALERT",
+            risk_level="CRITICAL" if risk["risk_score"] >= 81 else "HIGH",
+            related_alert_id=alert.id,
+        )
         update_trust_score(db, user, ["High-risk transaction", *risk["reasons"]], "high_risk_transaction")
     elif risk["risk_score"] <= 30:
         update_trust_score(db, user, ["Normal transaction"], "normal_transaction")

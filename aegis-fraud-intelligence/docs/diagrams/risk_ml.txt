@@ -1,0 +1,11 @@
+Transaction
+   |
+   +--> Rule Engine ---------> rule_score
+   |
+   +--> Feature Builder -----> XGBoost model -----> ml_score
+                                         |
+                                         v
+Combined final_score = 65% rule + 35% ML
+   |
+   v
+Adaptive Friction: allow, 2FA, hold, or block

@@ -14,6 +14,9 @@ class AlertResponse(BaseModel):
     title: str
     status: str
     created_at: datetime
+    is_case: bool = False
+    case_priority: str = "Monitor"
+    case_label: str = "Alert"
 
 
 class AlertDetailResponse(AlertResponse):
@@ -25,6 +28,7 @@ class AlertDetailResponse(AlertResponse):
 
 class AlertStatusUpdate(BaseModel):
     status: str
+    note: str | None = None
 
 
 class IncidentReportResponse(BaseModel):
@@ -41,4 +45,3 @@ class IncidentReportResponse(BaseModel):
     analyst_notes_placeholder: str
     status: str
     generated_at: datetime
-

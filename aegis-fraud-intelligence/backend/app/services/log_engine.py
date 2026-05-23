@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 
 from app.models import FraudAlert, SecurityLog, User
 from app.services.explanation_engine import generate_explanation
+from app.services.message_service import create_bank_message
 from app.services.risk_engine import calculate_security_log_risk
 from app.services.trust_engine import update_trust_score
 
@@ -59,10 +60,23 @@ def create_security_log(db: Session, input_data, user: User | None = None):
             status="OPEN",
         )
         db.add(alert)
+        db.flush()
         if user:
+            create_bank_message(
+                db,
+                user_id=user.id,
+                channel="IN_APP",
+                title="Security alert on your account",
+                body=(
+                    "AEGIS detected unusual activity on your account. "
+                    "Please review your account from inside the banking app."
+                ),
+                message_type="FRAUD_ALERT",
+                risk_level="CRITICAL" if risk["risk_score"] >= 81 else "HIGH",
+                related_alert_id=alert.id,
+            )
             update_trust_score(db, user, risk["reasons"], "security_log")
 
     db.commit()
     db.refresh(log)
     return {"log": log, "risk": risk, "alert": alert}
-

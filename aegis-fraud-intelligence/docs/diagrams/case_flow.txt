@@ -1,0 +1,21 @@
+Suspicious event
+   |
+   v
+Risk score calculated
+   |
+   v
+FraudAlert created
+   |
+   +-- HIGH / CRITICAL --> Investigation Case
+                            |
+                            v
+                       Analyst opens case
+                            |
+                            v
+                    Notes + status changes
+                            |
+                            v
+                       Decision trail
+                            |
+                            v
+                    Incident report generated

@@ -1,9 +1,10 @@
-from datetime import datetime, timedelta
+﻿from datetime import datetime, timedelta
 from typing import Any, cast
 
 from sqlalchemy.orm import Session
 
 from app.models import LoginEvent, MuleEdge, Transaction, User
+from app.services.ml_feature_builder import build_transaction_features
 from app.services.ml_score_engine import get_ml_transaction_score
 
 
@@ -141,31 +142,56 @@ def calculate_transaction_risk(
         reasons.append("VPN login before transaction")
 
     rule_score = cap_score(rule_score)
-    ml_result = get_ml_transaction_score(
-        transaction_data={
+    transaction_context = {
+        "amount": amount,
+        "to_account": to_account,
+        "recipient_is_new": recipient_is_new,
+        "currency": _value(input_data, "currency", "EUR"),
+        "created_at": created_at,
+    }
+    if db is not None:
+        ml_features = build_transaction_features(db, user, transaction_context, latest_login)
+    else:
+        ml_features = {
             "amount": amount,
-            "to_account": to_account,
-            "recipient_is_new": recipient_is_new,
-        },
-        user_context={
-            "user_id": user_id,
+            "recipient_is_new": int(recipient_is_new),
             "trust_score": user_trust_score,
             "average_transaction_amount": average_transaction_amount,
-        },
+        }
+
+    ml_result = get_ml_transaction_score(
+        transaction_data=ml_features,
+        user_context={"user_id": user_id},
     )
 
-    ml_score = int(ml_result.get("ml_score", 0) or 0)
+    ml_score = float(ml_result.get("ml_score", 0) or 0)
     ml_enabled = bool(ml_result.get("enabled", False))
-    risk_score = cap_score(max(rule_score, ml_score) if ml_enabled else rule_score)
+    if ml_enabled:
+        risk_score = cap_score(round((rule_score * 0.65) + (ml_score * 0.35)))
+    else:
+        risk_score = rule_score
+
+    final_reasons = list(reasons or ["Transaction matches expected behavior"])
+    if ml_enabled:
+        ml_band = str(ml_result.get("ml_risk_band", "UNKNOWN"))
+        final_reasons.append(f"XGBoost ML model classified transaction as {ml_band} risk")
+        final_reasons.append(
+            f"XGBoost fraud probability: {float(ml_result.get('ml_probability', 0) or 0) * 100:.1f}%"
+        )
 
     return {
         "risk_score": risk_score,
         "severity": get_severity(risk_score),
-        "reasons": reasons or ["Transaction matches expected behavior"],
+        "reasons": final_reasons,
         "rule_score": rule_score,
         "ml_score": ml_score,
+        "ml_probability": ml_result.get("ml_probability", 0),
+        "ml_flag": ml_result.get("ml_flag", 0),
+        "ml_risk_band": ml_result.get("ml_risk_band", "DISABLED"),
         "ml_model_version": ml_result.get("model_version", "unknown"),
         "ml_enabled": ml_enabled,
+        "ml_missing_features": ml_result.get("missing_features", []),
+        "ml_explanation": ml_result.get("explanation", ""),
     }
 
 
@@ -231,3 +257,4 @@ def calculate_token_theft_risk(input_data: Any):
         "severity": get_severity(risk_score),
         "reasons": reasons or ["No token theft indicators"],
     }
+

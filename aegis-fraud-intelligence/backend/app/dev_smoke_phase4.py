@@ -1,4 +1,4 @@
-from fastapi.testclient import TestClient
+﻿from fastapi.testclient import TestClient
 
 from app.main import app
 from app.seed import run_seed
@@ -130,12 +130,32 @@ def main():
         response = get_with_role(path, tokens["CUSTOMER"])
         check(f"CUSTOMER receives 403 for {path}", response.status_code == 403, response.text)
 
+    response = get_with_role("/api/messages/my", tokens["CUSTOMER"])
+    check(
+        "CUSTOMER can call /api/messages/my",
+        response.status_code == 200 and isinstance(response.json(), list),
+        response.text,
+    )
+    verify_response = post_with_role(
+        "/api/messages/verify",
+        tokens["CUSTOMER"],
+        {"message_text": "URGENT: Your Fibank account has been blocked. Click http://fake-fibank-login.example to verify your password and OTP immediately."},
+    )
+    check(
+        "CUSTOMER can call /api/messages/verify",
+        verify_response.status_code == 200 and verify_response.json()["result"] == "POSSIBLE_PHISHING",
+        verify_response.text,
+    )
+    response = get_with_role("/api/messages/checks", tokens["CUSTOMER"])
+    check("CUSTOMER receives 403 for /api/messages/checks", response.status_code == 403, response.text)
+
     analyst_allowed = [
         "/api/dashboard/stats",
         "/api/alerts",
         "/api/graph/mule-network",
         "/api/logs",
         "/api/users",
+        "/api/messages/checks",
     ]
     for path in analyst_allowed:
         response = get_with_role(path, tokens["ANALYST"])
@@ -146,7 +166,7 @@ def main():
         response = get_with_role(path, tokens["ANALYST"])
         check(f"ANALYST receives 403 for {path}", response.status_code == 403, response.text)
 
-    admin_allowed = ["/api/admin/users", "/api/admin/rules"]
+    admin_allowed = ["/api/admin/users", "/api/admin/rules", "/api/messages/all"]
     for path in admin_allowed:
         response = get_with_role(path, tokens["ADMIN"])
         check(f"ADMIN can access {path}", response.status_code == 200, response.text)
@@ -169,9 +189,29 @@ def main():
         report_response.text,
     )
 
+
+    fraud_customer_response = get_with_role("/api/fraud/health", tokens["CUSTOMER"])
+    check("CUSTOMER receives 403 for /api/fraud/health", fraud_customer_response.status_code == 403, fraud_customer_response.text)
+
+    for role in ["ANALYST", "ADMIN"]:
+        health_response = get_with_role("/api/fraud/health", tokens[role])
+        check(f"{role} can access /api/fraud/health", health_response.status_code == 200, health_response.text)
+        health_body = health_response.json()
+        check("/api/fraud/health returns model status", {"enabled", "model_loaded", "model_version", "feature_count"}.issubset(set(health_body.keys())), str(health_body))
+
+        score_response = post_with_role(
+            "/api/fraud/score",
+            tokens[role],
+            {"transaction": {"amount": 5000.0, "recipient_is_new": 1, "login_vpn_count": 2, "trust_score": 30.0}},
+        )
+        score_body = score_response.json()
+        check(f"{role} can call /api/fraud/score", score_response.status_code == 200, score_response.text)
+        check("/api/fraud/score returns ML or controlled fallback", {"ml_score", "ml_probability", "ml_flag", "ml_risk_band", "enabled"}.issubset(set(score_body.keys())), str(score_body))
+
     print("\nPhase 4 API smoke complete: all checks passed")
 
 
 if __name__ == "__main__":
     main()
+
 

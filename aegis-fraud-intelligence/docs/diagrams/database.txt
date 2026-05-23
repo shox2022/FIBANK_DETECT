@@ -1,0 +1,17 @@
+User
+ |-- Devices
+ |-- Sessions
+ |-- LoginEvents
+ |-- Transactions
+ |-- FraudAlerts
+ |    |-- AnalystNotes
+ |    +-- IncidentReport (generated response)
+ |-- TrustScoreHistory
+ |-- BankMessages
+ +-- MessageVerificationChecks
+
+BrandScanRun
+ +-- BrandThreatFindings
+
+RiskRule
+ +-- Used by Risk Transparency and risk scoring explanation

@@ -9,14 +9,14 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
     if user is None:
         return None
 
-    if not verify_password(password, user.password_hash):
+    if not verify_password(password, str(user.password_hash)):
         return None
 
     return user
 
 
 def create_login_response(user: User) -> dict:
-    access_token = create_access_token({"sub": str(user.id), "role": user.role})
+    access_token = create_access_token({"sub": str(user.id), "role": str(user.role)})
     return {
         "access_token": access_token,
         "token_type": "bearer",

@@ -7,6 +7,7 @@ import TrustMeter from "../components/TrustMeter";
 import RiskBadge from "../components/RiskBadge";
 import TransactionSimulator from "../components/TransactionSimulator";
 import DemoAttackPanel from "../components/DemoAttackPanel";
+import MlScorePanel from "../components/MlScorePanel";
 
 function ResultCard({ result }) {
   if (!result) return null;
@@ -62,13 +63,9 @@ function ResultCard({ result }) {
           {reasons.map((reason) => <span key={reason} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">{reason}</span>)}
         </div>
       )}
-      {"ml_model_version" in result && (
-        <div className="mt-4 grid gap-3 rounded-md border border-sky-200 bg-sky-50 p-3 text-sm text-slate-700 sm:grid-cols-4">
-          <span>Rule score: <b>{result.rule_score}</b></span>
-          <span>ML score: <b>{result.ml_score}</b></span>
-          <span className="sm:col-span-2">ML model: <b>{result.ml_model_version}</b> ({result.ml_enabled ? "enabled" : "disabled in prototype"})</span>
-        </div>
-      )}
+      <div className="mt-4">
+        <MlScorePanel result={result} />
+      </div>
     </section>
   );
 }

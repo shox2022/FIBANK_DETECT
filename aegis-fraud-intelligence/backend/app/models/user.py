@@ -41,4 +41,10 @@ class User(Base):
     trust_score_history = relationship(
         "TrustScoreHistory", back_populates="user", cascade="all, delete-orphan"
     )
-
+    bank_messages = relationship("BankMessage", back_populates="user")
+    message_verification_checks = relationship(
+        "MessageVerificationCheck",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    analyst_notes = relationship("AnalystNote", back_populates="analyst")

@@ -6,6 +6,9 @@ import CustomerApp from "./pages/CustomerApp";
 import SocDashboard from "./pages/SocDashboard";
 import AlertDetails from "./pages/AlertDetails";
 import AdminPanel from "./pages/AdminPanel";
+import VerifiedMessages from "./pages/VerifiedMessages";
+import BrandProtection from "./pages/BrandProtection";
+import RiskTransparency from "./pages/RiskTransparency";
 import AccessDenied from "./pages/AccessDenied";
 
 function HomeRedirect() {
@@ -30,6 +33,14 @@ export default function App() {
         }
       />
       <Route
+        path="/messages"
+        element={
+          <RoleRoute allowedRoles={["CUSTOMER", "ANALYST", "ADMIN"]}>
+            <VerifiedMessages />
+          </RoleRoute>
+        }
+      />
+      <Route
         path="/dashboard"
         element={
           <RoleRoute allowedRoles={["ANALYST", "ADMIN"]}>
@@ -46,6 +57,22 @@ export default function App() {
         }
       />
       <Route
+        path="/brand-protection"
+        element={
+          <RoleRoute allowedRoles={["ANALYST", "ADMIN"]}>
+            <BrandProtection />
+          </RoleRoute>
+        }
+      />
+      <Route
+        path="/risk-transparency"
+        element={
+          <RoleRoute allowedRoles={["ANALYST", "ADMIN"]}>
+            <RiskTransparency />
+          </RoleRoute>
+        }
+      />
+      <Route
         path="/admin"
         element={
           <RoleRoute allowedRoles={["ADMIN"]}>
@@ -58,4 +85,3 @@ export default function App() {
     </Routes>
   );
 }
-

@@ -1,0 +1,14 @@
+Customer pastes suspicious SMS/email
+        |
+        v
+Compare with official simulated bank messages
+        |
+        v
+Check phishing indicators
+        |
+        v
+Result: VERIFIED_OFFICIAL, SUSPICIOUS,
+        POSSIBLE_PHISHING, or UNKNOWN
+        |
+        v
+Customer receives safety recommendation

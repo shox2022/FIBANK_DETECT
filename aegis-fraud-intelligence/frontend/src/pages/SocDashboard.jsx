@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { ExternalLink, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import api, { apiErrorMessage } from "../api";
 import Navbar from "../components/Navbar";
@@ -9,6 +10,10 @@ import LogViewer from "../components/LogViewer";
 import MuleGraph from "../components/MuleGraph";
 import AdaptiveFrictionCard from "../components/AdaptiveFrictionCard";
 import PrivacyPanel from "../components/PrivacyPanel";
+import MlModelStatusCard from "../components/MlModelStatusCard";
+import MlScoreTestPanel from "../components/MlScoreTestPanel";
+import MessageVerificationActivity from "../components/MessageVerificationActivity";
+import BrandProtectionSummaryCard from "../components/BrandProtectionSummaryCard";
 
 const severityColors = {
   LOW: "#34d399",
@@ -93,6 +98,53 @@ export default function SocDashboard() {
             </div>
           </section>
         </div>
+        <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+          <MlModelStatusCard />
+          <MlScoreTestPanel />
+        </div>
+        <section className="rounded-lg border border-sky-400/20 bg-slate-900/80 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-md bg-sky-500/15 p-2 text-sky-300">
+                <SlidersHorizontal className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-sky-300">Risk Transparency</p>
+                <h2 className="font-semibold">Explainable Risk Rules</h2>
+                <p className="mt-1 text-sm text-slate-400">View how AEGIS calculates risk and applies adaptive friction.</p>
+              </div>
+            </div>
+            <Link to="/risk-transparency" className="inline-flex items-center gap-2 rounded-md bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-400">
+              Open Transparency <ExternalLink className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+        <section className="rounded-lg border border-purple-400/20 bg-slate-900/80 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-purple-300">Investigation Cases</p>
+              <h2 className="font-semibold">Recent High-Priority Alerts</h2>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {alerts.filter((alert) => alert.is_case).slice(0, 4).map((alert) => (
+              <Link key={alert.id} to={`/alerts/${alert.id}`} className="rounded-md border border-white/10 bg-slate-950/70 p-4 hover:border-purple-400/40">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-white">{alert.title}</p>
+                    <p className="mt-1 text-xs text-slate-400">{alert.customer_name || "Network alert"} - {alert.status}</p>
+                  </div>
+                  <span className="rounded-full bg-purple-500/15 px-2.5 py-1 text-xs font-semibold text-purple-200">
+                    {alert.case_priority}
+                  </span>
+                </div>
+              </Link>
+            ))}
+            {!alerts.some((alert) => alert.is_case) && <p className="text-sm text-slate-400">No HIGH or CRITICAL investigation cases are currently open.</p>}
+          </div>
+        </section>
+        <BrandProtectionSummaryCard />
+        <MessageVerificationActivity />
         <section className="rounded-lg border border-white/10 bg-slate-900/80">
           <div className="border-b border-white/10 px-5 py-4">
             <h2 className="font-semibold">Recent Transactions</h2>

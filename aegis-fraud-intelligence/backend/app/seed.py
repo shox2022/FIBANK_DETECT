@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from app.core.security import hash_password
 from app.database import Base, SessionLocal, engine
 from app.models import (
+    AnalystNote,
+    BankMessage,
     Device,
     FraudAlert,
     LoginEvent,
@@ -136,6 +138,27 @@ def ensure_mule_edge(db, created_at, **data):
     return edge
 
 
+def ensure_bank_message(db, user, created_at, **data):
+    message = (
+        db.query(BankMessage)
+        .filter(
+            BankMessage.user_id == user.id,
+            BankMessage.title == data["title"],
+            BankMessage.body == data["body"],
+        )
+        .first()
+    )
+    if message is None:
+        message = BankMessage(user_id=user.id, created_at=created_at, **data)
+        db.add(message)
+        return message
+
+    for key, value in data.items():
+        setattr(message, key, value)
+    message.created_at = created_at
+    return message
+
+
 def upsert_risk_rule(db, **data):
     rule = db.query(RiskRule).filter(RiskRule.code == data["code"]).first()
     if rule is None:
@@ -147,6 +170,23 @@ def upsert_risk_rule(db, **data):
     rule.points = data["points"]
     rule.enabled = data["enabled"]
     return rule
+
+
+def ensure_analyst_note(db, alert, analyst, **data):
+    note = (
+        db.query(AnalystNote)
+        .filter(
+            AnalystNote.alert_id == alert.id,
+            AnalystNote.analyst_user_id == analyst.id,
+            AnalystNote.action_type == data["action_type"],
+            AnalystNote.note == data["note"],
+        )
+        .first()
+    )
+    if note is None:
+        note = AnalystNote(alert_id=alert.id, analyst_user_id=analyst.id, **data)
+        db.add(note)
+    return note
 
 
 def seed_users(db):
@@ -389,6 +429,8 @@ def seed_demo_foundation(db, users):
 def seed_risk_rules(db):
     rules = [
         ("LOGIN_NEW_DEVICE", "New device used during login", 20),
+        ("LOGIN_VPN_DETECTED", "VPN detected during login", 20),
+        ("LOGIN_PROXY_DETECTED", "Proxy detected during login", 15),
         ("LOGIN_VPN", "VPN detected during login", 20),
         ("LOGIN_PROXY", "Proxy detected during login", 15),
         ("LOGIN_NEW_COUNTRY", "Login from country outside customer baseline", 15),
@@ -396,6 +438,7 @@ def seed_risk_rules(db):
         ("LOGIN_FAILED_ATTEMPTS", "Multiple failed login attempts", 15),
         ("LOGIN_UNUSUAL_HOUR", "Login at an unusual hour", 10),
         ("TX_AMOUNT_5X_AVERAGE", "Transaction amount exceeds 5x customer average", 25),
+        ("TX_AMOUNT_SPIKE", "Transaction amount sharply exceeds customer baseline", 25),
         ("TX_NEW_BENEFICIARY", "Transfer to a new beneficiary", 15),
         ("TX_AFTER_SUSPICIOUS_LOGIN", "Transaction after suspicious login", 25),
         ("TX_BURST_ACTIVITY", "Many transactions in a short time", 20),
@@ -411,6 +454,9 @@ def seed_risk_rules(db):
         ("TOKEN_VPN_PROXY", "Same token used with VPN or proxy metadata", 50),
         ("MULE_FAN_IN", "One account receives funds from unrelated accounts", 30),
         ("MULE_PASS_THROUGH", "Account sends out most received funds quickly", 35),
+        ("TRUST_VPN_DECREASE", "Trust decreases when VPN activity appears in risky context", 10),
+        ("TRUST_NORMAL_INCREASE", "Trust can increase after normal verified behavior", 2),
+        ("ML_XGBOOST_SCORE", "XGBoost fraud probability contributes to final transaction risk when enabled", 35),
     ]
     for code, description, points in rules:
         upsert_risk_rule(
@@ -422,6 +468,91 @@ def seed_risk_rules(db):
         )
 
 
+def seed_analyst_notes(db, users):
+    analyst = users["analyst@aegis.test"]
+    alerts = (
+        db.query(FraudAlert)
+        .filter(FraudAlert.severity.in_(["HIGH", "CRITICAL"]))
+        .order_by(FraudAlert.created_at.asc())
+        .limit(2)
+        .all()
+    )
+    for alert in alerts:
+        ensure_analyst_note(
+            db,
+            alert,
+            analyst,
+            note="Initial triage opened. Reviewing customer login, transaction, and trust timeline.",
+            action_type="NOTE",
+            old_status=None,
+            new_status=None,
+            created_at=alert.created_at + timedelta(minutes=2),
+        )
+        ensure_analyst_note(
+            db,
+            alert,
+            analyst,
+            note="Case queued for investigation due to elevated severity and risk score.",
+            action_type="ESCALATED",
+            old_status=None,
+            new_status=None,
+            created_at=alert.created_at + timedelta(minutes=4),
+        )
+
+
+def seed_bank_messages(db, users):
+    customer = users["customer@aegis.test"]
+    messages = [
+        {
+            "created_at": SEED_START - timedelta(hours=6),
+            "channel": "SMS",
+            "title": "New login detected",
+            "body": (
+                "AEGIS detected a new login to your banking account from Tirana, Albania. "
+                "If this was not you, open the official banking app and review your account security."
+            ),
+            "message_type": "SECURITY_ALERT",
+            "risk_level": "LOW",
+        },
+        {
+            "created_at": SEED_START - timedelta(days=2),
+            "channel": "EMAIL",
+            "title": "Transfer confirmation",
+            "body": (
+                "Your transfer of 65.00 EUR was processed successfully. "
+                "You can view details inside your banking app."
+            ),
+            "message_type": "TRANSACTION_ALERT",
+            "risk_level": "LOW",
+        },
+        {
+            "created_at": SEED_START + timedelta(hours=1, minutes=20),
+            "channel": "IN_APP",
+            "title": "Transaction held for review",
+            "body": (
+                "Your transfer was held for security review. Please open the banking app "
+                "to complete verification."
+            ),
+            "message_type": "TRANSACTION_ALERT",
+            "risk_level": "HIGH",
+        },
+        {
+            "created_at": SEED_START - timedelta(hours=1),
+            "channel": "IN_APP",
+            "title": "Protect yourself from phishing",
+            "body": (
+                "The bank will never ask for your password, PIN, card number, CVV, or OTP "
+                "through email or SMS. Always verify messages inside the official banking app."
+            ),
+            "message_type": "GENERAL_NOTICE",
+            "risk_level": "LOW",
+        },
+    ]
+    for message in messages:
+        created_at = message.pop("created_at")
+        ensure_bank_message(db, customer, created_at, **message, official=True)
+
+
 def run_seed():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
@@ -429,6 +560,8 @@ def run_seed():
         users = seed_users(db)
         seed_demo_foundation(db, users)
         seed_risk_rules(db)
+        seed_bank_messages(db, users)
+        seed_analyst_notes(db, users)
         db.commit()
         print("AEGIS seed complete. Demo users and risk rules are ready.")
     except Exception:

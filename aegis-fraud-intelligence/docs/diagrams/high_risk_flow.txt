@@ -1,0 +1,22 @@
+Customer starts transfer
+   |
+   v
+Frontend POST /api/simulate/transaction
+   |
+   v
+Route -> Controller -> Simulation Service
+   |
+   v
+Rule risk + ML score + trust context
+   |
+   v
+Adaptive friction decides status
+   |
+   v
+Transaction saved, trust updated, alert created
+   |
+   v
+SOC dashboard shows case
+   |
+   v
+Analyst adds notes and generates incident report

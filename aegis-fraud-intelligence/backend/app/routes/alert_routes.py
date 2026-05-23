@@ -13,6 +13,9 @@ router = APIRouter()
 
 
 def _alert_detail(alert):
+    severity = alert.severity or "LOW"
+    is_case = severity in {"HIGH", "CRITICAL"}
+    case_priority = "P1" if severity == "CRITICAL" else "P2" if severity == "HIGH" else "P3" if severity == "MEDIUM" else "Monitor"
     return {
         "id": alert.id,
         "user_id": alert.user_id,
@@ -26,6 +29,9 @@ def _alert_detail(alert):
         "created_at": alert.created_at,
         "customer_name": alert.user.name if alert.user else None,
         "trust_score": alert.user.trust_score if alert.user else None,
+        "is_case": is_case,
+        "case_priority": case_priority,
+        "case_label": "Investigation Case" if is_case else "Alert",
     }
 
 
@@ -54,7 +60,7 @@ def update_alert_status(
     current_user: User = Depends(require_roles([ANALYST, ADMIN])),
 ):
     return jsonable_encoder(
-        _alert_detail(alert_controller.update_alert_status(db, alert_id, payload))
+        _alert_detail(alert_controller.update_alert_status(db, alert_id, payload, current_user))
     )
 
 
@@ -65,4 +71,3 @@ def incident_report(
     current_user: User = Depends(require_roles([ANALYST, ADMIN])),
 ):
     return jsonable_encoder(alert_controller.incident_report(db, alert_id))
-

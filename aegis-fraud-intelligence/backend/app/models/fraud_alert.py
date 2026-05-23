@@ -21,4 +21,8 @@ class FraudAlert(Base):
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
 
     user = relationship("User", back_populates="fraud_alerts")
-
+    analyst_notes = relationship(
+        "AnalystNote",
+        back_populates="alert",
+        cascade="all, delete-orphan",
+    )

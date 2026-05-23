@@ -1,0 +1,16 @@
+Analyst starts quick brand scan
+        |
+        v
+Generate Fibank-like candidate domains
+        |
+        v
+Passive DNS resolution
+        |
+        v
+Fetch public page metadata only
+        |
+        v
+Score brand keywords + phishing signals
+        |
+        v
+Store findings and show dashboard summary

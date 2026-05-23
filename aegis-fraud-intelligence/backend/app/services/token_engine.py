@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models import FraudAlert, Session as UserSession, User
 from app.services.explanation_engine import generate_explanation
+from app.services.message_service import create_bank_message
 from app.services.risk_engine import calculate_token_theft_risk
 from app.services.trust_engine import update_trust_score
 
@@ -43,7 +44,21 @@ def detect_token_theft(db: Session, input_data, user: User | None = None):
             status="OPEN",
         )
         db.add(alert)
+        db.flush()
         if user:
+            create_bank_message(
+                db,
+                user_id=user.id,
+                channel="IN_APP",
+                title="Suspicious session detected",
+                body=(
+                    "A suspicious session was detected and may have been invalidated for your protection. "
+                    "Please re-authenticate from the official banking app."
+                ),
+                message_type="AUTHENTICATION_ALERT",
+                risk_level="CRITICAL",
+                related_alert_id=alert.id,
+            )
             update_trust_score(db, user, ["Token theft", *risk["reasons"]], "token_theft")
 
     db.commit()

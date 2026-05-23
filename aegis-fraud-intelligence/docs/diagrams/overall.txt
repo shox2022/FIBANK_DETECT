@@ -1,0 +1,18 @@
+Customer App / Analyst UI / Admin UI
+        |
+        v
+React + Vite Frontend
+        |
+        v
+FastAPI Backend (/api)
+        |
+        v
+Routes -> Controllers -> Services / Engines
+        |
+        +--> SQLite Database
+        +--> XGBoost ML Adapter
+        +--> Brand Protection Detector
+        +--> Verified Messages Checker
+        |
+        v
+SOC Dashboard, Investigation Cases, Risk Transparency

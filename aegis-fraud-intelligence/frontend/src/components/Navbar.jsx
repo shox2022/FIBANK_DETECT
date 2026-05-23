@@ -25,7 +25,10 @@ export default function Navbar({ variant = "dark" }) {
         </Link>
         <nav className="flex items-center gap-2">
           {user?.role === "CUSTOMER" && <NavLink className={linkClass} to="/customer">Customer</NavLink>}
+          {user && <NavLink className={linkClass} to="/messages">Verified Messages</NavLink>}
           {(user?.role === "ANALYST" || user?.role === "ADMIN") && <NavLink className={linkClass} to="/dashboard">SOC</NavLink>}
+          {(user?.role === "ANALYST" || user?.role === "ADMIN") && <NavLink className={linkClass} to="/brand-protection">Brand Protection</NavLink>}
+          {(user?.role === "ANALYST" || user?.role === "ADMIN") && <NavLink className={linkClass} to="/risk-transparency">Risk Transparency</NavLink>}
           {user?.role === "ADMIN" && <NavLink className={linkClass} to="/admin">Admin</NavLink>}
           <span className={`hidden text-sm sm:inline ${dark ? "text-slate-400" : "text-slate-500"}`}>{user?.name}</span>
           <button
@@ -42,4 +45,3 @@ export default function Navbar({ variant = "dark" }) {
     </header>
   );
 }
-

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+﻿from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -74,8 +74,13 @@ def simulate_transaction(
             "reasons": risk["reasons"],
             "rule_score": risk["rule_score"],
             "ml_score": risk["ml_score"],
+            "ml_probability": risk.get("ml_probability", 0),
+            "ml_flag": risk.get("ml_flag", 0),
+            "ml_risk_band": risk.get("ml_risk_band", "DISABLED"),
             "ml_model_version": risk["ml_model_version"],
             "ml_enabled": risk["ml_enabled"],
+            "ml_missing_features": risk.get("ml_missing_features", []),
+            "ml_explanation": risk.get("ml_explanation", ""),
             "friction": result["friction"],
             "transaction": {
                 "id": tx.id,
@@ -162,3 +167,5 @@ def simulate_mule_ring(
             "graph": result["graph"],
         }
     )
+
+
