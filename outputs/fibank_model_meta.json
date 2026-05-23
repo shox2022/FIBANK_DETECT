@@ -1,0 +1,303 @@
+{
+  "model_path": "C:\\Users\\user\\Desktop\\fibankWeb\\outputs\\fibank_fraud_model.ubj",
+  "feature_cols": [
+    "amount",
+    "amount_log",
+    "amount_ratio",
+    "amount_vs_balance",
+    "is_tiny_probe",
+    "is_large_spike",
+    "tx_hour",
+    "tx_dow",
+    "is_night",
+    "is_weekend",
+    "user_age_days",
+    "recipient_is_new",
+    "beneficiary_tx_count",
+    "trust_score",
+    "average_transaction_amount",
+    "balance",
+    "user_tx_count_24h",
+    "login_failed_attempts_total",
+    "login_vpn_count",
+    "login_proxy_count",
+    "login_risk_score_mean",
+    "login_success_rate",
+    "login_country_nunique",
+    "device_count",
+    "trusted_device_count",
+    "os_nunique",
+    "browser_nunique",
+    "untrusted_device_ratio",
+    "session_country_mismatch",
+    "seclog_count",
+    "seclog_risk_mean",
+    "seclog_critical_count",
+    "seclog_high_count",
+    "trust_delta_mean",
+    "trust_change_count",
+    "status_blocked",
+    "status_held",
+    "status_2fa",
+    "currency_foreign",
+    "home_country_enc",
+    "session_country_enc",
+    "role_enc"
+  ],
+  "fraud_threshold": 0.35,
+  "trained_at": "2026-05-23T02:45:55.366926",
+  "features": {
+    "amount": {
+      "source": "TX",
+      "type": "float",
+      "desc": "Raw transaction amount in the transaction's currency.",
+      "fraud_signal": "Unusually high amounts vs the user's historical average are a strong signal."
+    },
+    "amount_log": {
+      "source": "ENG",
+      "type": "float",
+      "desc": "log1p(amount). Compresses the heavy-tailed distribution for the model.",
+      "fraud_signal": "Works alongside 'amount' to capture both small probe txs and large spikes."
+    },
+    "amount_ratio": {
+      "source": "ENG",
+      "type": "float",
+      "desc": "amount / user's average_transaction_amount. Values >> 1 mean the tx is far above normal.",
+      "fraud_signal": "> 5\u00d7 the user's average is flagged as is_large_spike."
+    },
+    "amount_vs_balance": {
+      "source": "ENG",
+      "type": "float",
+      "desc": "amount / user's account balance. High ratio means the tx nearly drains the account.",
+      "fraud_signal": "Account-draining transfers are a classic takeover pattern."
+    },
+    "is_tiny_probe": {
+      "source": "ENG",
+      "type": "int (0/1)",
+      "desc": "1 if amount < 2.0 (ANY currency). Fraudsters send micro-txs to verify account is live.",
+      "fraud_signal": "A tiny probe followed by a large tx on the same account is a red flag."
+    },
+    "is_large_spike": {
+      "source": "ENG",
+      "type": "int (0/1)",
+      "desc": "1 if amount_ratio > 5. The current transaction is 5\u00d7 the user's normal spend.",
+      "fraud_signal": "High-value outlier relative to the user's own history."
+    },
+    "tx_hour": {
+      "source": "ENG",
+      "type": "int (0\u201323)",
+      "desc": "Hour of day (local server time) when the transaction was created.",
+      "fraud_signal": "Fraud clusters in night hours (23:00\u201305:00); captured by is_night."
+    },
+    "tx_dow": {
+      "source": "ENG",
+      "type": "int (0=Mon \u2026 6=Sun)",
+      "desc": "Day of week of the transaction.",
+      "fraud_signal": "Weekend transactions have slightly higher fraud rates in this dataset."
+    },
+    "is_night": {
+      "source": "ENG",
+      "type": "int (0/1)",
+      "desc": "1 if tx_hour is between 23:00 and 05:59 inclusive.",
+      "fraud_signal": "Most users don't transfer money at 3 AM."
+    },
+    "is_weekend": {
+      "source": "ENG",
+      "type": "int (0/1)",
+      "desc": "1 if the transaction falls on Saturday or Sunday.",
+      "fraud_signal": "Support staff are reduced on weekends, fraudsters exploit this."
+    },
+    "user_age_days": {
+      "source": "ENG",
+      "type": "int",
+      "desc": "Days between the user account creation date and the transaction date.",
+      "fraud_signal": "New accounts (< 30 days) committing large transfers are high risk."
+    },
+    "recipient_is_new": {
+      "source": "TX",
+      "type": "int (0/1)",
+      "desc": "1 if this is the first time this user has sent money to this recipient.",
+      "fraud_signal": "The #1 ranked feature. Fraudsters always transfer to new/unknown accounts."
+    },
+    "beneficiary_tx_count": {
+      "source": "ENG",
+      "type": "int",
+      "desc": "How many prior transactions this user has sent to the same to_account (cumulative count up to this transaction, sorted by created_at). 0 = brand new beneficiary.",
+      "fraud_signal": "The lower this is, the more novel the recipient."
+    },
+    "trust_score": {
+      "source": "USR",
+      "type": "float (0\u2013100)",
+      "desc": "Platform-computed trust score for the user (stored in User.trust_score). Updated by TrustScoreHistory events. 100 = fully trusted.",
+      "fraud_signal": "Compromised accounts tend to have erratic or declining trust scores."
+    },
+    "average_transaction_amount": {
+      "source": "USR",
+      "type": "float",
+      "desc": "The user's long-run average transaction amount, stored on the User record.",
+      "fraud_signal": "Used as the denominator in amount_ratio."
+    },
+    "balance": {
+      "source": "USR",
+      "type": "float",
+      "desc": "Current account balance at time of feature engineering.",
+      "fraud_signal": "Used in amount_vs_balance."
+    },
+    "user_tx_count_24h": {
+      "source": "ENG",
+      "type": "int",
+      "desc": "Approximate cumulative transaction count for this user (expanding window sorted by timestamp, not a strict 24h rolling window). Replace with a true rolling window when connected to a live DB.",
+      "fraud_signal": "Burst of transactions in a short window = account takeover pattern."
+    },
+    "login_failed_attempts_total": {
+      "source": "LOG",
+      "type": "int",
+      "desc": "Sum of all LoginEvent.failed_attempts for this user across all login events.",
+      "fraud_signal": "High failed attempt total suggests brute-force credential attack."
+    },
+    "login_vpn_count": {
+      "source": "LOG",
+      "type": "int",
+      "desc": "Number of LoginEvents where LoginEvent.is_vpn = True for this user.",
+      "fraud_signal": "VPN usage can mask geographic origin of attacker."
+    },
+    "login_proxy_count": {
+      "source": "LOG",
+      "type": "int",
+      "desc": "Number of LoginEvents where LoginEvent.is_proxy = True for this user.",
+      "fraud_signal": "Proxy usage is a stronger anonymisation signal than VPN."
+    },
+    "login_risk_score_mean": {
+      "source": "LOG",
+      "type": "float (0\u20131)",
+      "desc": "Mean of LoginEvent.risk_score across all login events for this user.",
+      "fraud_signal": "Persistently high login risk scores precede fraudulent transactions."
+    },
+    "login_success_rate": {
+      "source": "LOG",
+      "type": "float (0\u20131)",
+      "desc": "Fraction of LoginEvents where LoginEvent.success = True.",
+      "fraud_signal": "A low success rate means many failed logins \u2014 credential stuffing."
+    },
+    "login_country_nunique": {
+      "source": "LOG",
+      "type": "int",
+      "desc": "Number of distinct countries seen in LoginEvent.country for this user.",
+      "fraud_signal": "Logging in from many countries is impossible-travel behaviour."
+    },
+    "device_count": {
+      "source": "DEV",
+      "type": "int",
+      "desc": "Total number of Device records associated with this user.",
+      "fraud_signal": "Sudden spike in device count = attacker registering new devices."
+    },
+    "trusted_device_count": {
+      "source": "DEV",
+      "type": "int",
+      "desc": "Number of devices where Device.is_trusted = True for this user.",
+      "fraud_signal": "Low trusted count means most activity is from unrecognised devices."
+    },
+    "os_nunique": {
+      "source": "DEV",
+      "type": "int",
+      "desc": "Number of distinct Device.os values seen for this user.",
+      "fraud_signal": "A single user logging in from Windows, Android, Linux, iOS simultaneously is suspicious."
+    },
+    "browser_nunique": {
+      "source": "DEV",
+      "type": "int",
+      "desc": "Number of distinct Device.browser values seen for this user.",
+      "fraud_signal": "Similar to os_nunique \u2014 excessive browser diversity is unusual."
+    },
+    "untrusted_device_ratio": {
+      "source": "ENG",
+      "type": "float (0\u20131)",
+      "desc": "1 - (trusted_device_count / device_count). Fraction of untrusted devices.",
+      "fraud_signal": "1.0 means ALL devices are untrusted \u2014 very high risk."
+    },
+    "session_country_mismatch": {
+      "source": "ENG",
+      "type": "int (0/1)",
+      "desc": "1 if the country of the user's most recent Session differs from User.home_country. Proxies 'is the user transacting from abroad?'",
+      "fraud_signal": "Impossible travel or account takeover from a foreign country."
+    },
+    "seclog_count": {
+      "source": "SEC",
+      "type": "int",
+      "desc": "Total SecurityLog events for this user.",
+      "fraud_signal": "Many security events mean the account has already triggered alerts."
+    },
+    "seclog_risk_mean": {
+      "source": "SEC",
+      "type": "float (0\u20131)",
+      "desc": "Mean SecurityLog.risk_score across all security log entries for this user.",
+      "fraud_signal": "Persistently elevated security risk precedes fraud."
+    },
+    "seclog_critical_count": {
+      "source": "SEC",
+      "type": "int",
+      "desc": "Number of SecurityLog entries with severity = 'CRITICAL' for this user.",
+      "fraud_signal": "Critical alerts are rare and highly predictive of fraud."
+    },
+    "seclog_high_count": {
+      "source": "SEC",
+      "type": "int",
+      "desc": "Number of SecurityLog entries with severity = 'HIGH' for this user.",
+      "fraud_signal": "Second tier alert severity; combined with CRITICAL gives full picture."
+    },
+    "trust_delta_mean": {
+      "source": "TSH",
+      "type": "float",
+      "desc": "Net change in trust score: last TrustScoreHistory.new_score minus first TrustScoreHistory.new_score for this user. Negative = declining trust.",
+      "fraud_signal": "A sharply declining trust score indicates recent bad behaviour."
+    },
+    "trust_change_count": {
+      "source": "TSH",
+      "type": "int",
+      "desc": "Number of TrustScoreHistory records for this user.",
+      "fraud_signal": "Many changes = volatile trust history, often tied to fraud events."
+    },
+    "status_blocked": {
+      "source": "TX",
+      "type": "int (0/1)",
+      "desc": "1 if Transaction.status = 'BLOCKED'.",
+      "fraud_signal": "The rule engine already flagged this transaction."
+    },
+    "status_held": {
+      "source": "TX",
+      "type": "int (0/1)",
+      "desc": "1 if Transaction.status = 'HELD'.",
+      "fraud_signal": "On hold for manual review \u2014 moderate risk signal."
+    },
+    "status_2fa": {
+      "source": "TX",
+      "type": "int (0/1)",
+      "desc": "1 if Transaction.status = 'REQUIRE_2FA'.",
+      "fraud_signal": "System requested a second factor \u2014 moderate risk signal."
+    },
+    "currency_foreign": {
+      "source": "TX",
+      "type": "int (0/1)",
+      "desc": "1 if Transaction.currency != 'ALL' (Albanian Lek). Foreign currency transaction.",
+      "fraud_signal": "Cross-currency transfers are used to obscure money movement."
+    },
+    "home_country_enc": {
+      "source": "ENG",
+      "type": "int",
+      "desc": "Label-encoded User.home_country (sklearn LabelEncoder, fit on training data).",
+      "fraud_signal": "Indirect; model learns country-level fraud rates."
+    },
+    "session_country_enc": {
+      "source": "ENG",
+      "type": "int",
+      "desc": "Label-encoded country of the user's most recent Session.",
+      "fraud_signal": "Certain session origin countries have higher fraud rates."
+    },
+    "role_enc": {
+      "source": "ENG",
+      "type": "int",
+      "desc": "Label-encoded User.role (CUSTOMER=0, ANALYST=1, ADMIN=2 \u2014 order may vary).",
+      "fraud_signal": "Admin/analyst roles transacting large amounts is anomalous."
+    }
+  }
+}
