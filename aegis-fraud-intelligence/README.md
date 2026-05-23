@@ -64,13 +64,13 @@ password123
 The React frontend expects the FastAPI backend at:
 
 ```text
-http://localhost:8010
+http://localhost:8000
 ```
 
 To override this, create `frontend/.env` from `frontend/.env.example` and set:
 
 ```text
-VITE_API_BASE_URL=http://localhost:8010
+VITE_API_BASE_URL=http://localhost:8000
 ```
 
 Run the frontend:
@@ -84,8 +84,8 @@ npm run dev
 Open:
 
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:8010
-- Swagger docs: http://localhost:8010/docs
+- Backend API: http://localhost:8000
+- Swagger docs: http://localhost:8000/docs
 
 Build check:
 

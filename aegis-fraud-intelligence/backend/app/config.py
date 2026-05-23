@@ -40,6 +40,16 @@ class Settings(BaseModel):
     )
     frontend_url: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+    @property
+    def cors_origins(self) -> list[str]:
+        origins = {
+            self.frontend_url,
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5174",
+        }
+        return sorted(origin for origin in origins if origin)
+
 
 settings = Settings()
-

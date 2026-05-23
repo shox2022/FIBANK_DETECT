@@ -1,5 +1,3 @@
-from typing import cast
-
 from sqlalchemy.orm import Session
 
 from app.core.security import create_access_token, verify_password
@@ -11,15 +9,14 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
     if user is None:
         return None
 
-    password_hash = cast(str, user.password_hash)
-    if not verify_password(password, password_hash):
+    if not verify_password(password, user.password_hash):
         return None
 
     return user
 
 
 def create_login_response(user: User) -> dict:
-    access_token = create_access_token({"sub": str(user.id)})
+    access_token = create_access_token({"sub": str(user.id), "role": user.role})
     return {
         "access_token": access_token,
         "token_type": "bearer",

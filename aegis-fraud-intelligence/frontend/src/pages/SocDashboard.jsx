@@ -124,13 +124,13 @@ export default function SocDashboard() {
             </table>
           </div>
         </section>
+        <MuleGraph graph={graph} />
         <div className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
-          <MuleGraph graph={graph} />
           <LogViewer logs={logs} />
-        </div>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <AdaptiveFrictionCard />
-          <PrivacyPanel />
+          <div className="space-y-6">
+            <AdaptiveFrictionCard />
+            <PrivacyPanel />
+          </div>
         </div>
       </div>
     </main>

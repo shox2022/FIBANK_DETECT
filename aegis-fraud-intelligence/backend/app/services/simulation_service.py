@@ -107,15 +107,48 @@ def simulate_transaction(db: Session, input_data, fallback_user: User | None = N
         "HOLD_FOR_REVIEW": "HELD",
         "BLOCK_AND_ALERT": "BLOCKED",
     }
+    amount = float(input_data.amount)
+    sender_balance_before = float(cast(float, user.balance))
+    recipient = (
+        db.query(User)
+        .filter(User.account_number == input_data.to_account)
+        .first()
+    )
+    recipient_balance_before = (
+        float(cast(float, recipient.balance)) if recipient is not None else None
+    )
+    balance_applied = False
+    balance_message = "Balance unchanged while the transaction is pending review."
+    transaction_status = status_map[friction["action"]]
+
+    if transaction_status == "ALLOWED":
+        if sender_balance_before >= amount:
+            user.balance = sender_balance_before - amount
+            if recipient is not None:
+                recipient.balance = recipient_balance_before + amount
+            balance_applied = True
+            balance_message = "Transfer posted to the account balance."
+        else:
+            transaction_status = "DECLINED"
+            friction = {
+                **friction,
+                "action": "DECLINED_INSUFFICIENT_FUNDS",
+                "label": "Declined",
+                "message": "Insufficient available balance.",
+                "customer_message": "Insufficient available balance.",
+                "analyst_message": "Low-risk transaction declined because the source account lacks available funds.",
+            }
+            balance_message = "Transfer declined because the source account has insufficient funds."
+
     transaction = Transaction(
         user_id=user.id,
         from_account=user.account_number or "UNKNOWN",
         to_account=input_data.to_account,
-        amount=input_data.amount,
+        amount=amount,
         currency=input_data.currency,
         recipient_name=input_data.recipient_name,
         recipient_is_new=input_data.recipient_is_new,
-        status=status_map[friction["action"]],
+        status=transaction_status,
         risk_score=risk["risk_score"],
     )
     db.add(transaction)
@@ -145,11 +178,24 @@ def simulate_transaction(db: Session, input_data, fallback_user: User | None = N
 
     db.commit()
     db.refresh(transaction)
+    db.refresh(user)
+    if recipient is not None:
+        db.refresh(recipient)
     return {
         "transaction": transaction,
         "risk": risk,
         "friction": friction,
         "alert": alert,
+        "balance": {
+            "applied": balance_applied,
+            "message": balance_message,
+            "from_account": user.account_number,
+            "from_before": sender_balance_before,
+            "from_after": float(cast(float, user.balance)),
+            "to_account": input_data.to_account,
+            "to_before": recipient_balance_before,
+            "to_after": float(cast(float, recipient.balance)) if recipient is not None else None,
+        },
     }
 
 

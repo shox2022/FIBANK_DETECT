@@ -91,6 +91,7 @@ def simulate_transaction(
                 "created_at": tx.created_at,
             },
             "alert": _alert_payload(result.get("alert")),
+            "balance": result["balance"],
         }
     )
 
@@ -161,4 +162,3 @@ def simulate_mule_ring(
             "graph": result["graph"],
         }
     )
-

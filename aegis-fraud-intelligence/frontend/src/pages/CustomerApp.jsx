@@ -14,6 +14,7 @@ function ResultCard({ result }) {
   const severity = result.severity ?? result.risk?.severity;
   const reasons = result.reasons ?? result.risk?.reasons ?? [];
   const tx = result.transaction;
+  const balance = result.balance;
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -37,6 +38,25 @@ function ResultCard({ result }) {
       <div className="mt-4 rounded-md bg-slate-50 p-3 text-sm text-slate-700">
         {(result.friction?.customer_message || result.message || "AEGIS completed the analysis.")}
       </div>
+      {balance && (
+        <div className="mt-4 rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-700">
+          <p className="font-semibold text-slate-950">{balance.message}</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <span>
+              Source: <b>EUR {Number(balance.from_before || 0).toLocaleString()}</b>
+              {" -> "}
+              <b>EUR {Number(balance.from_after || 0).toLocaleString()}</b>
+            </span>
+            {balance.to_after !== null && balance.to_after !== undefined && (
+              <span>
+                Recipient: <b>EUR {Number(balance.to_before || 0).toLocaleString()}</b>
+                {" -> "}
+                <b>EUR {Number(balance.to_after || 0).toLocaleString()}</b>
+              </span>
+            )}
+          </div>
+        </div>
+      )}
       {reasons.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           {reasons.map((reason) => <span key={reason} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">{reason}</span>)}

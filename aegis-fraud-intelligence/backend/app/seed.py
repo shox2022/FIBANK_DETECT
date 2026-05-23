@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
-from passlib.context import CryptContext
-
+from app.core.security import hash_password
 from app.database import Base, SessionLocal, engine
 from app.models import (
     Device,
@@ -16,18 +15,13 @@ from app.models import (
 )
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SEED_START = datetime(2026, 5, 20, 9, 0, 0)
-
-
-def password_hash(password: str) -> str:
-    return pwd_context.hash(password)
 
 
 def upsert_user(db, data):
     user = db.query(User).filter(User.email == data["email"]).first()
     if user is None:
-        user = User(**data, password_hash=password_hash("password123"))
+        user = User(**data, password_hash=hash_password("password123"))
         db.add(user)
         db.flush()
         return user
@@ -446,4 +440,3 @@ def run_seed():
 
 if __name__ == "__main__":
     run_seed()
-
