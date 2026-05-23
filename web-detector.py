@@ -1,12 +1,9 @@
-import re
-import sys
+# Whois lookup could be added later
+
 import time
-import socket
 import logging
 import argparse
-import itertools
 from datetime import datetime
-from urllib.parse import urlparse
 
 import requests
 import dns.resolver
