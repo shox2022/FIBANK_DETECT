@@ -1,0 +1,11 @@
+backend/.env
+backend/aegis.sqlite
+backend/venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+frontend/node_modules/
+frontend/dist/
+frontend-vite.log
+frontend-vite.err.log
+.vscode/

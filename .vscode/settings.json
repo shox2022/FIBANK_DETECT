@@ -1,0 +1,8 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}\\aegis-fraud-intelligence\\backend\\venv\\Scripts\\python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}\\aegis-fraud-intelligence\\backend"
+  ],
+  "python.terminal.activateEnvironment": true
+}
+
